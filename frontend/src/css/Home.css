@@ -15,7 +15,6 @@
     animation: fadeUp 0.6s ease forwards;
 }
 
-/* Slight lift effect on hover */
 .home-inner:hover {
     transform: translateY(-3px);
 }
