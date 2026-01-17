@@ -44,14 +44,6 @@ export default function CreateRoom() {
     async function handleCreateRoom(e) {
         e.preventDefault(); 
 
-        console.log({
-            hostName,
-            maxPlayers,
-            gameMode,
-            enableHints,
-            selectedCategories
-        });
-
         if (!hostName.trim()) {
             setError("Please enter a host name before creating the room.");
             return;
@@ -72,14 +64,46 @@ export default function CreateRoom() {
             return;
         }
 
-        console.log("Room data is valid:", {
+         const payload = {
             hostName,
             maxPlayers,
             gameMode,
             enableHints,
-            selectedCategories
-        });
+            categories: selectedCategories
+        };
+        
+        try {
+            const response = await fetch("http://localhost:8080/api/v1/games/room/create", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
 
+            const data = await response.json();
+            console.log(data);
+
+            if (response.ok) {
+                localStorage.setItem("roomCode", data.roomCode);
+                localStorage.setItem("playerId", data.playerId);
+                localStorage.setItem("host", data.host);
+
+                //window.location.href = "/room"
+
+            } else {
+                setError(data.message || "Failed to create room");
+            }
+
+        } catch (error) {
+            setError(error.message || "Network error");
+        }
+    }
+
+    function clearRoomData() {
+        localStorage.removeItem("roomCode");
+        localStorage.removeItem("playerId");
+        localStorage.removeItem("host");
     }
 
     function handleCategoryToggle(category) {
@@ -135,7 +159,7 @@ export default function CreateRoom() {
 
                     <div className="create-btn-container-submit">
                         <div className="create-btn-group-submit">
-                            <Link to="/home" className="create-button-back">Back</Link>
+                            <Link to="/home" className="create-button-back" onClick={clearRoomData}>Back</Link>
                             <button type="submit" className="create-button-room">Create</button>
                         </div>  
                     </div>
