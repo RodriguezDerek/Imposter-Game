@@ -1,0 +1,14 @@
+.home-outer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.home-inner {
+    background-color: #0C0C0C;
+    border: 2px solid rgba(150,100,255,0.35);
+    height: 350px;
+    width: 600px;
+    border-radius: 12px;
+}

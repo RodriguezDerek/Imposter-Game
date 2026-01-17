@@ -1,0 +1,35 @@
+* {
+    font-family: 'Overpass', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    background-color: #0C0C0C;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(150,100,255,0.35) 1px, transparent 2px);
+    background-size: 20px 20px;
+    animation: move 30s linear infinite;
+    z-index: 0;
+}
+
+@keyframes move {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100px, -100px); }
+}
+
+#root, .App {
+    position: relative;
+    z-index: 1;
+}
