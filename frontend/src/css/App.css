@@ -1,0 +1,12 @@
+* {
+    font-family: 'Overpass', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    background-image: linear-gradient(to bottom right, #0C0C0C, #100F1D);
+}

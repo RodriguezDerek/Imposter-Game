@@ -1,6 +1,7 @@
+import './css/App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import './App.css';
+import CreateRoom from './pages/CreateRoom';
 
 export default function App() {
   return (
@@ -8,6 +9,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/home" element={<Home />} />
+                <Route path="/create" element={<CreateRoom />} />
             </Routes>
         </Router>
     );

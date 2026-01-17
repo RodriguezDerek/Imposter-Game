@@ -6,9 +6,114 @@
 }
 
 .home-inner {
-    background-color: #0C0C0C;
-    border: 2px solid rgba(150,100,255,0.35);
-    height: 350px;
+    background-color: #12121C;
+    height: 370px;
     width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+    animation: fadeUp 0.6s ease forwards;
+}
+
+/* Slight lift effect on hover */
+.home-inner:hover {
+    transform: translateY(-3px);
+}
+
+.home-title {
+    text-align: center;
+    color: white;
+    font-size: 44px;
+    font-weight: 700;
+    margin: 40px 0 6px 0;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.2s;
+}
+
+.home-subtitle {
+    text-align: center;
+    color: #B3B3B3;
+    font-size: 16px;
+    font-weight: 400;
+    margin: 0 0 40px 0;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.4s;
+}
+
+.home-btn-container {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 20px;
+    width: 80%;
+    margin: 0 auto;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.6s;
+}
+
+.home-btn-create, 
+.home-btn-join {
+    height: 50px;
+    width: 100%;
     border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.home-btn-create {
+    background-color: #6C63FF;
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+}
+
+.home-btn-create:hover {
+    background-color: #584dff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(108, 99, 255, 0.4);
+}
+
+.home-btn-create:active {
+    transform: translateY(0);
+}
+
+.home-btn-join {
+    background-color: #1F1F2E;
+    border: 1px solid #2a2a3a;
+}
+
+.home-btn-join:hover {
+    background-color: #252536;
+    transform: translateY(-2px);
+}
+
+.home-btn-join:active {
+    transform: translateY(0);
+}
+
+.home-footer {
+    margin-top: 30px;
+    color: #B3B3B3;
+    font-size: 12px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.8s;
+}
+
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
