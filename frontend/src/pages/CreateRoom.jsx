@@ -159,7 +159,7 @@ export default function CreateRoom() {
 
                     <div className="create-btn-container-submit">
                         <div className="create-btn-group-submit">
-                            <Link to="/home" className="create-button-back" onClick={clearRoomData}>Back</Link>
+                            <Link to="/home" className="create-button-back">Back</Link>
                             <button type="submit" className="create-button-room">Create</button>
                         </div>  
                     </div>

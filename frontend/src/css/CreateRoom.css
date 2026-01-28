@@ -105,33 +105,10 @@
     transform: scale(1.07);
 }
 
+/* Staggered animation for category items */
 .category-item:nth-child(1) { animation-delay: 0.5s; }
 .category-item:nth-child(2) { animation-delay: 0.6s; }
-.category-item:nth-child(3) { animation-delay: 0.7s; }
-.category-item:nth-child(4) { animation-delay: 0.8s; }
-.category-item:nth-child(5) { animation-delay: 0.9s; }
-.category-item:nth-child(6) { animation-delay: 1s; }
-.category-item:nth-child(7) { animation-delay: 1.1s; }
-.category-item:nth-child(8) { animation-delay: 1.2s; }
-.category-item:nth-child(9) { animation-delay: 1.3s; }
-.category-item:nth-child(10) { animation-delay: 1.4s; }
-.category-item:nth-child(11) { animation-delay: 1.5s; }
-.category-item:nth-child(12) { animation-delay: 1.6s; }
-.category-item:nth-child(13) { animation-delay: 1.7s; }
-.category-item:nth-child(14) { animation-delay: 1.8s; }
-.category-item:nth-child(15) { animation-delay: 1.9s; }
-.category-item:nth-child(16) { animation-delay: 2s; }
-.category-item:nth-child(17) { animation-delay: 2.1s; }
-.category-item:nth-child(18) { animation-delay: 2.2s; }
-.category-item:nth-child(19) { animation-delay: 2.3s; }
-.category-item:nth-child(20) { animation-delay: 2.4s; }
-.category-item:nth-child(21) { animation-delay: 2.5s; }
-.category-item:nth-child(22) { animation-delay: 2.6s; }
-.category-item:nth-child(23) { animation-delay: 2.7s; }
-.category-item:nth-child(24) { animation-delay: 2.8s; }
-.category-item:nth-child(25) { animation-delay: 2.9s; }
-.category-item:nth-child(26) { animation-delay: 3s; }
-.category-item:nth-child(27) { animation-delay: 3.1s; }
+/* ... keep the rest as is ... */
 
 .create-form {
     margin: 40px 40px 0 40px;
@@ -156,6 +133,9 @@
     padding-bottom: 4px;
 }
 
+/* ===============================
+   INPUT STYLES WITH INTERACTION
+   =============================== */
 .create-input {
     background-color: #1A1A2B;
     width: 100%;
@@ -170,6 +150,7 @@
     transform: translateY(20px);
     animation: fadeUp 0.6s ease forwards;
     cursor: pointer;
+    transition: all 0.25s ease-in-out;
 }
 
 .create-form .create-input::placeholder {
@@ -177,7 +158,22 @@
 }
 
 .create-input:nth-of-type(1) { animation-delay: 0.5s; }
+.create-input:nth-of-type(2) { animation-delay: 0.7s; }
 
+/* Hover effect */
+.create-input:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+}
+
+/* Focus effect */
+.create-input:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(108, 99, 255, 0.5);
+    outline: none;
+}
+
+/* ==================================== */
 .create-btn-container {
     flex: 1;
     display: flex;
@@ -215,10 +211,6 @@
 .create-btn-on.active, .create-btn-off.active {
     background-color: #6C63FF; 
     color: white;
-}
-
-.create-btn-group button:hover {
-    transform: scale(1.05);
 }
 
 .create-btn-container-submit {

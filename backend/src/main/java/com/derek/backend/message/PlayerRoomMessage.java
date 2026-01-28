@@ -1,7 +1,5 @@
 package com.derek.backend.message;
 
-import com.derek.backend.model.Room;
-import com.derek.backend.status.GameState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GameStateMessage {
-    private String type;
-    private GameState gameState;
-    private Room room;
+public class PlayerRoomMessage {
+    private String roomCode;
+    private String playerId;
+    private boolean isHost;
 }

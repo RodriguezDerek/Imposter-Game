@@ -106,6 +106,15 @@
     animation-delay: 0.8s;
 }
 
+.home-btn-join:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(108, 99, 255, 0.4);
+}
+
+.home-btn-join:active {
+    transform: translateY(0);
+}
+
 @keyframes fadeUp {
     0% {
         opacity: 0;

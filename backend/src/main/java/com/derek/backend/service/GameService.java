@@ -8,6 +8,7 @@ import com.derek.backend.exception.PlayerNameExistsException;
 import com.derek.backend.exception.RoomFullException;
 import com.derek.backend.exception.RoomNotFoundException;
 import com.derek.backend.message.GameStateMessage;
+import com.derek.backend.message.PlayerRoomMessage;
 import com.derek.backend.model.Player;
 import com.derek.backend.model.Room;
 import com.derek.backend.status.GameState;
@@ -26,7 +27,7 @@ public class GameService {
     private final SimpMessageSendingOperations messageTemplate;
     private final Map<String, Room> rooms = new HashMap<>();
 
-    public GameStateMessage createRoom(CreateRoomRequest request) {
+    public PlayerRoomMessage createRoom(CreateRoomRequest request) {
         if (request == null) {
             throw new InvalidCreateRoomException("CreateRoomRequest cannot be null");
         }
@@ -69,15 +70,14 @@ public class GameService {
 
         rooms.put(room.getCode(), room);
 
-        return GameStateMessage.builder()
-                .type("CREATE_ROOM")
-                .gameState(GameState.LOBBY)
-                .room(room)
+        return PlayerRoomMessage.builder()
+                .roomCode(room.getCode())
                 .playerId(host.getId())
+                .isHost(host.isHost())
                 .build();
     }
 
-    public GameStateMessage joinRoom(JoinRoomRequest request) {
+    public PlayerRoomMessage joinRoom(JoinRoomRequest request) {
         Room room = rooms.get(request.getRoomCode());
 
         if (room == null) {
@@ -104,11 +104,24 @@ public class GameService {
 
         messageTemplate.convertAndSend("/topic/room/" + request.getRoomCode(), room);
 
-        return GameStateMessage.builder()
-                .type("JOIN_ROOM")
-                .gameState(GameState.LOBBY)
-                .room(room)
+        return PlayerRoomMessage.builder()
+                .roomCode(room.getCode())
                 .playerId(player.getId())
+                .isHost(player.isHost())
+                .build();
+    }
+
+    public GameStateMessage getRoom(String code) {
+        Room room = rooms.get(code);
+
+        if (room == null) {
+            throw new RoomNotFoundException("Room not found");
+        }
+
+        return GameStateMessage.builder()
+                .type("ROOM_INFO")
+                .gameState(room.getGameState())
+                .room(room)
                 .build();
     }
 
