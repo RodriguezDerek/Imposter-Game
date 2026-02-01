@@ -1,15 +1,58 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import '../css/JoinRoom.css'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import ErrorToast from '../components/ErrorToast';
 
 export default function JoinRoom() {
+    const navigate = useNavigate();
 
     const [playerName, setPlayerName] = useState("");
     const [roomCode, setRoomCode] = useState("");
     const [error, setError] = useState("")
 
-    async function handleJoinRoom() {
-        console.log("Joining room...");
+    async function handleJoinRoom(e) {
+        e.preventDefault()
+
+        if (!playerName.trim()) {
+            setError("Please enter a player name");
+            return;
+        }
+
+        if (!roomCode.trim()) {
+            setError("Please enter a room code")
+            return;
+        }
+
+        const payload = {
+            playerName,
+            roomCode
+        }
+
+        try {
+            const response = await fetch("http://localhost:8080/api/v1/games/room/join", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem("roomCode", data.roomCode);
+                localStorage.setItem("playerId", data.playerId);
+                localStorage.setItem("host", data.host);
+
+                navigate(`/room/${data.roomCode}`);
+
+            } else {
+                setError(data.message || "Failed to join room")
+            }
+
+        } catch (error) {
+            setError(error.message || "Network error")
+        }
     }
 
     return(

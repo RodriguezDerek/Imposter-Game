@@ -2,6 +2,7 @@ package com.derek.backend.controller;
 
 import com.derek.backend.dto.CreateRoomRequest;
 import com.derek.backend.dto.JoinRoomRequest;
+import com.derek.backend.dto.StartGameRequest;
 import com.derek.backend.message.GameStateMessage;
 import com.derek.backend.message.PlayerRoomMessage;
 import com.derek.backend.service.GameService;
@@ -26,6 +27,11 @@ public class GameController {
     @PostMapping("/room/join")
     public ResponseEntity<PlayerRoomMessage> joinRoom(@RequestBody JoinRoomRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.joinRoom(request));
+    }
+
+    @PostMapping("/start/{roomCode}")
+    public ResponseEntity<GameStateMessage> startGame(@RequestBody StartGameRequest request) {
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.startGame(request));
     }
 
     @GetMapping("/room/{roomCode}")

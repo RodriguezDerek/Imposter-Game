@@ -1,9 +1,10 @@
 import '../css/CreateRoom.css';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ErrorToast from '../components/ErrorToast';
 
 export default function CreateRoom() {
+    const navigate = useNavigate();
     const categories = [
             "Animals",
             "Food",
@@ -82,14 +83,13 @@ export default function CreateRoom() {
             });
 
             const data = await response.json();
-            console.log(data);
 
             if (response.ok) {
                 localStorage.setItem("roomCode", data.roomCode);
                 localStorage.setItem("playerId", data.playerId);
                 localStorage.setItem("host", data.host);
 
-                //window.location.href = "/room"
+                navigate(`/room/${data.roomCode}`);
 
             } else {
                 setError(data.message || "Failed to create room");
@@ -98,12 +98,6 @@ export default function CreateRoom() {
         } catch (error) {
             setError(error.message || "Network error");
         }
-    }
-
-    function clearRoomData() {
-        localStorage.removeItem("roomCode");
-        localStorage.removeItem("playerId");
-        localStorage.removeItem("host");
     }
 
     function handleCategoryToggle(category) {
@@ -115,7 +109,6 @@ export default function CreateRoom() {
     }
 
     return(
-        
         <div className="create-outer">
             {error && <ErrorToast message={error} onClose={() => setError("")} duration={4000} />}
 

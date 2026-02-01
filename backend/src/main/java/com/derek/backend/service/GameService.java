@@ -104,6 +104,8 @@ public class GameService {
 
         messageTemplate.convertAndSend("/topic/room/" + request.getRoomCode(), room);
 
+        System.out.println(room.getPlayers());
+
         return PlayerRoomMessage.builder()
                 .roomCode(room.getCode())
                 .playerId(player.getId())
@@ -125,7 +127,8 @@ public class GameService {
                 .build();
     }
 
-    public void startGame(StartGameRequest request) {
+    public GameStateMessage startGame(StartGameRequest request) {
+        return GameStateMessage.builder().build();
     }
 
     public void setRoleReady() {
