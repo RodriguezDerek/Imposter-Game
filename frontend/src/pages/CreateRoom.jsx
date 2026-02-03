@@ -85,9 +85,15 @@ export default function CreateRoom() {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem("roomCode", data.roomCode);
-                localStorage.setItem("playerId", data.playerId);
-                localStorage.setItem("host", data.host);
+                // FOR PRDOUCTION, UNCOMMENT THESE LINES
+                //localStorage.setItem("roomCode", data.roomCode);
+                //localStorage.setItem("playerId", data.playerId);
+                //localStorage.setItem("host", data.host);
+
+                // TEMPORARY FOR TESTING
+                sessionStorage.setItem("roomCode", data.roomCode);
+                sessionStorage.setItem("playerId", data.playerId);
+                sessionStorage.setItem("host", data.host);
 
                 navigate(`/room/${data.roomCode}`);
 
@@ -112,67 +118,67 @@ export default function CreateRoom() {
         <div className="create-outer">
             {error && <ErrorToast message={error} onClose={() => setError("")} duration={4000} />}
 
-            <div className="create-left-panel">
-                <h1 className="create-left-panel-title">Create Room</h1>
-                <p className="create-left-panel-subtitle">Set up your game</p>
+            <div className="create-main-card">
+                <div className="create-left-panel">
+                    <h1 className="create-left-panel-title">Create Room</h1>
+                    <p className="create-left-panel-subtitle">Set up your game</p>
 
-                <form className="create-form" onSubmit={handleCreateRoom}>
-                    <label className="create-label">Host Name</label>
-                    <input value={hostName} onChange={(e) => setHostName(e.target.value)} className="create-input" placeholder="Enter player name"/>
+                    <form className="create-form" onSubmit={handleCreateRoom}>
+                        <label className="create-host-label">Host Name</label>
+                        <input value={hostName} onChange={(e) => setHostName(e.target.value)} className="create-input" placeholder="Enter player name"/>
 
-                    <div className="create-row">
-                        <div className="create-field">
-                            <label className="create-label">Max Players</label>
-                            <select value={maxPlayers || ""} onChange={(e) => setMaxPlayers(Number(e.target.value))} className="create-input select-placeholder">
-                                <option value="" disabled hidden>Select players</option>
-                                <option value={4}>4 Players</option>
-                                <option value={6}>6 Players</option>
-                                <option value={8}>8 Players</option>
-                                <option value={10}>10 Players</option>
-                            </select>
+                        <div className="create-row">
+                            <div className="create-field">
+                                <label className="create-label">Max Players</label>
+                                <select value={maxPlayers || ""} onChange={(e) => setMaxPlayers(Number(e.target.value))} className="create-input">
+                                    <option value="" disabled hidden>Select players</option>
+                                    <option value={4}>4 Players</option>
+                                    <option value={6}>6 Players</option>
+                                    <option value={8}>8 Players</option>
+                                    <option value={10}>10 Players</option>
+                                </select>
+                            </div>
+
+                            <div className="create-field">
+                                <label className="create-label">Game Mode</label>
+                                <select value={gameMode} onChange={(e) => setGameMode(e.target.value)} className="create-input">
+                                    <option value="" disabled hidden>Select mode</option>
+                                    <option value="ONE_IMPOSTER">One Imposter</option>
+                                    <option value="TWO_IMPOSTER">Two Imposter</option>
+                                </select>
+                            </div>
+
+                            <div className="create-field">
+                                <label className="create-label">Hints</label>
+                                <div className="create-toggle-group">
+                                    <button type="button" className={`toggle-btn ${enableHints ? "active" : ""}`} onClick={() => setEnableHints(true)}>ON</button>
+                                    <button type="button" className={`toggle-btn ${!enableHints ? "active" : ""}`} onClick={() => setEnableHints(false)}>OFF</button>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="create-field">
-                            <label className="create-label">Game Mode</label>
-                            <select value={gameMode} onChange={(e) => setGameMode(e.target.value)} className="create-input select-placeholder">
-                                <option value="" disabled hidden>Select mode</option>
-                                <option value="ONE_IMPOSTER">One Imposter</option>
-                                <option value="TWO_IMPOSTER">Two Imposter</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="create-btn-container">
-                        <label className="create-label">Hints</label>
-                        <div className="create-btn-group">
-                            <button type="button" className={`create-btn-on ${enableHints ? "active" : ""}`} onClick={() => setEnableHints(true)}>ON</button>
-                            <button type="button" className={`create-btn-off ${!enableHints ? "active" : ""}`} onClick={() => setEnableHints(false)}>OFF</button>
-                        </div>
-                    </div>
-
-                    <div className="create-btn-container-submit">
                         <div className="create-btn-group-submit">
                             <Link to="/home" className="create-button-back">Back</Link>
                             <button type="submit" className="create-button-room">Create</button>
                         </div>  
+
+                        <p className="create-footer">A room code will be generated automatically</p>
+                    </form>
+                </div>
+
+                <div className="create-right-panel">
+                    <div className="sticky-header">
+                        <h1 className="create-right-panel-title">Categories</h1>
+                        <p className="create-left-panel-subtitle">Select topics for the game</p>
                     </div>
 
-                    <p className="create-footer">A room code will be generated automatically</p>
-
-                </form>
-            </div>
-
-            <div className="create-right-panel">
-                <h1 className="create-right-panel-title">Categories</h1>
-
-                <div className="create-category-container">
-                    {categories.map((category) => {
-                        return (
+                    <div className="create-category-container">
+                        {categories.map((category) => (
                             <div key={category} className={`category-item ${selectedCategories.includes(category) ? "selected" : ""}`} onClick={() => handleCategoryToggle(category)}>
                                 {category}
                             </div>
-                        );
-                    })}
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

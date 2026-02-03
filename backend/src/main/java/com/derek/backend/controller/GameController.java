@@ -29,11 +29,6 @@ public class GameController {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.joinRoom(request));
     }
 
-    @PostMapping("/start/{roomCode}")
-    public ResponseEntity<GameStateMessage> startGame(@RequestBody StartGameRequest request) {
-        return ResponseEntity.status(HttpStatus.OK).body(gameService.startGame(request));
-    }
-
     @GetMapping("/room/{roomCode}")
     public ResponseEntity<GameStateMessage> getRoom(@PathVariable String roomCode) {
         return ResponseEntity.status(HttpStatus.OK).body(gameService.getRoom(roomCode));

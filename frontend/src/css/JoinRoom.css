@@ -1,166 +1,151 @@
 .join-outer {
+    --bg-dark: #0a0a0c;
+    --card-bg: rgba(23, 23, 28, 0.75);
+    --primary: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.4);
+    --success: #22c55e;
+    --success-glow: rgba(34, 197, 94, 0.3);
+    --text-main: #ffffff;
+    --text-dim: #94a3b8;
+    --input-bg: rgba(0, 0, 0, 0.3);
+    --border-color: rgba(255, 255, 255, 0.1);
+
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 20px;
+    
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+    font-family: 'Inter', sans-serif;
 }
 
 .join-inner {
-    background-color: #12121C;
-    height: 490px;
-    width: 450px;
-    border-radius: 16px;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.6s ease forwards;
-    animation-delay: 0.2s;
-    transition: transform 0.3s ease;
-}
-
-.join-inner:hover {
-    transform: translateY(-3px);
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    height: 462px;
+    width: 100%;
+    max-width: 450px;
+    padding: 50px 40px;
+    border-radius: 24px;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+    animation: fadeUp 0.6s ease-out forwards;
 }
 
 .join-title {
-    color: white;
-    font-size: 32px;
-    font-weight: 700;
+    color: var(--text-main);
+    font-size: 2.5rem;
+    font-weight: 800;
     text-align: center;
-    margin: 40px 0 0 0;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards;
-    animation-delay: 0.3s;
+    margin: 0;
+    letter-spacing: -0.02em;
 }
 
 .join-subtitle {
-    color: #B3B3B3;
-    font-size: 16px;
-    font-weight: 400;
+    color: var(--text-dim);
+    font-size: 1rem;
     text-align: center;
-    margin: 6px 0 0 0;
-    opacity: 0;
-    animation: fadeUp 0.6s ease forwards;
-    animation-delay: 0.4s;
+    margin: 8px 0 40px 0;
 }
 
 .join-subcontainer {
-    padding: 30px 34px 20px 34px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 .join-label {
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    align-self: flex-start;
+    color: var(--text-main);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 4px;
 }
 
 .join-input {
-    background-color: #1A1A2B;
-    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: white;
     height: 54px;
-    border: none;
-    border-radius: 16px;
-    color: white;
     padding: 0 16px;
+    width: 100%;
+    font-size: 1rem;
     box-sizing: border-box;
-    font-size: 16px;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.6s ease forwards;
-    cursor: pointer;
-    transition: all 0.25s ease-in-out;
+    transition: all 0.2s ease;
+    margin-bottom: 20px;
 }
 
-.join-input:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+.join-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 15px var(--primary-glow);
+    background: rgba(0, 0, 0, 0.4);
 }
 
-.join-form .join-input::placeholder {
-    color: white;
+.join-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
 }
-
-.join-input:nth-of-type(1) { animation-delay: 0.5s; }
-.join-input:nth-of-type(2) { animation-delay: 0.7s; }
 
 .join-btn-container-submit {
     display: flex;
-    gap: 10px;
-    justify-content: center;
+    gap: 15px;
     margin-top: 20px;
-    padding: 0 34px 0 34px;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.6s ease forwards;
-    animation-delay: 1s;
 }
 
-.join-btn-container-submit a,
-.join-btn-container-submit button {
+.join-button-back,
+.join-button-room {
     flex: 1;
-    height: 52px;
+    height: 54px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: 14px;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.25s ease-in-out;
-}
-
-.join-button-back {
-    background-color: #1F1F2E;
-    color: white;
-}
-
-.join-button-back:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(108, 99, 255, 0.4);
-}
-
-.join-button-back:active {
-    transform: translateY(0);
-}
-
-.join-button-room {
-    background-color: #22C55E;
-    color: white;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
 }
 
-.join-button-room:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+.join-button-back {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid var(--border-color);
 }
 
-.join-button-room:active {
-    transform: translateY(0) scale(1);
+.join-button-back:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+.join-button-room {
+    background: var(--success);
+    color: white;
+    box-shadow: 0 8px 20px -4px var(--success-glow);
+}
+
+.join-button-room:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 24px -4px var(--success-glow);
 }
 
 .join-footer {
     text-align: center;
-    color: #B3B3B3;
-    font-size: 12px;
-    font-weight: 400;
-    padding-top: 20px;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.6s ease forwards;
-    animation-delay: 1.2s;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    margin-top: 40px;
 }
 
 @keyframes fadeUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }

@@ -40,9 +40,15 @@ export default function JoinRoom() {
             const data = await response.json();
 
             if (response.ok) {
-                localStorage.setItem("roomCode", data.roomCode);
-                localStorage.setItem("playerId", data.playerId);
-                localStorage.setItem("host", data.host);
+                // FOR PRDOUCTION, UNCOMMENT THESE LINES
+                // localStorage.setItem("roomCode", data.roomCode);
+                // localStorage.setItem("playerId", data.playerId);
+                // localStorage.setItem("host", data.host);
+
+                // TEMPORARY FOR TESTING
+                sessionStorage.setItem("roomCode", data.roomCode);
+                sessionStorage.setItem("playerId", data.playerId);
+                sessionStorage.setItem("host", data.host);
 
                 navigate(`/room/${data.roomCode}`);
 

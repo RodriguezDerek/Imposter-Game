@@ -1,8 +1,6 @@
 package com.derek.backend.service;
 
-import com.derek.backend.dto.CreateRoomRequest;
-import com.derek.backend.dto.JoinRoomRequest;
-import com.derek.backend.dto.StartGameRequest;
+import com.derek.backend.dto.*;
 import com.derek.backend.exception.InvalidCreateRoomException;
 import com.derek.backend.exception.PlayerNameExistsException;
 import com.derek.backend.exception.RoomFullException;
@@ -127,20 +125,19 @@ public class GameService {
                 .build();
     }
 
-    public GameStateMessage startGame(StartGameRequest request) {
-        return GameStateMessage.builder().build();
+    public void startGame(StartGameRequest request) {
+
+    }
+
+    public void leaveRoom(LeaveGameRequest request) {
+
+    }
+
+    public void kickPlayer(KickPlayerRequest request) {
+
     }
 
     public void setRoleReady() {
-    }
-
-    public void setDiscussionReady() {
-    }
-
-    public void backToLobby() {
-    }
-
-    public void leaveRoom() {
     }
 
     private String validatePlayerName(String name) {
@@ -162,6 +159,6 @@ public class GameService {
     }
 
     private String generateRoomCode() {
-        return UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
     }
 }
