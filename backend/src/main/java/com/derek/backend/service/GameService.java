@@ -1,10 +1,7 @@
 package com.derek.backend.service;
 
 import com.derek.backend.dto.*;
-import com.derek.backend.exception.InvalidCreateRoomException;
-import com.derek.backend.exception.PlayerNameExistsException;
-import com.derek.backend.exception.RoomFullException;
-import com.derek.backend.exception.RoomNotFoundException;
+import com.derek.backend.exception.*;
 import com.derek.backend.message.GameStateMessage;
 import com.derek.backend.message.PlayerRoomMessage;
 import com.derek.backend.model.Player;
@@ -14,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
+import javax.naming.NoPermissionException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -64,6 +62,7 @@ public class GameService {
         host.setName(request.getHostName().trim());
         host.setHost(true);
         host.setReady(false);
+        room.setHost(host);
         room.getPlayers().put(host.getId(), host);
 
         rooms.put(room.getCode(), room);
@@ -100,7 +99,10 @@ public class GameService {
 
         room.getPlayers().put(player.getId(), player);
 
-        messageTemplate.convertAndSend("/topic/room/" + request.getRoomCode(), room);
+        messageTemplate.convertAndSend(
+                "/topic/room/" + request.getRoomCode(),
+                room
+        );
 
         System.out.println(room.getPlayers());
 
@@ -130,11 +132,57 @@ public class GameService {
     }
 
     public void leaveRoom(LeaveGameRequest request) {
+        String roomCode = request.getRoomCode();
+        String playerId = request.getPlayerId();
 
+        Room room = rooms.get(roomCode);
+
+        if (room == null) {
+            throw new RoomNotFoundException("Room not found");
+        }
+
+        if (!room.getPlayers().containsKey(playerId)) {
+            throw new PlayerNotFoundException("Player not found");
+        }
+
+        if (room.getHost().getId().equals(playerId)) {
+            // Host left → delete room
+            rooms.remove(roomCode);
+            Map<String, String> payload = Map.of("type", "HOST_LEFT");
+            messageTemplate.convertAndSend("/topic/room/" + roomCode, payload);
+
+        } else {
+            // Remove player
+            room.getPlayers().remove(playerId);
+            messageTemplate.convertAndSend("/topic/room/" + roomCode, room);
+        }
     }
 
     public void kickPlayer(KickPlayerRequest request) {
+        String roomCode = request.getRoomCode();
+        String hostId = request.getHostId();
+        String playerId = request.getPlayerId();
 
+        Room room = rooms.get(roomCode);
+
+        if (room == null) {
+            throw new RoomNotFoundException("Room not found");
+        }
+
+        if (hostId.equals(playerId)) {
+            throw new InvalidPermissionException("Cannot kick yourself");
+        }
+
+        if (!room.getHost().getId().equals(hostId)) {
+            throw new InvalidPermissionException("Only host can kick players");
+        }
+
+        room.getPlayers().remove(playerId);
+
+        messageTemplate.convertAndSend(
+                "/topic/room/" + roomCode,
+                room
+        );
     }
 
     public void setRoleReady() {

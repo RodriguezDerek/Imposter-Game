@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LeaveGameRequest {
     private String playerId;
+    private String roomCode;
 }

@@ -1,7 +1,7 @@
 import '../css/GameRoom.css';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import ErrorToast from '../components/ErrorToast';
 import Loading from '../components/Loading';
 import Lobby from '../components/Lobby';
@@ -10,12 +10,12 @@ export default function GameRoom() {
     // TEMPORARY FOR TESTING
     const roomCode = sessionStorage.getItem("roomCode");
     const playerId = sessionStorage.getItem("playerId");
-    const isHost = sessionStorage.getItem("host");
+    const isHost = sessionStorage.getItem("host") === "true";
 
     // FOR PRDOUCTION, UNCOMMENT THESE LINES
     // const roomCode = localStorage.getItem("roomCode");
     // const playerId = localStorage.getItem("playerId");
-    // const isHost = localStorage.getItem("host");
+    // const isHost = localStorage.getItem("host") === "true";
 
     const [stompClient, setStompClient] = useState(null);
     const [gameState, setGameState] = useState(null);
@@ -28,18 +28,19 @@ export default function GameRoom() {
             const data = await response.json();
 
             if (response.ok) {
-                setGameState(data.gameState)
-                setGameData(data.room)
+                setGameState(data.gameState);
+                setGameData(data.room);
             } else {
                 setError(data.message || "Failed to get room data");
             }
-
-        } catch (error) {
-            setError(error.message || "Network error")
+        } catch (err) {
+            setError(err.message || "Network error");
         }
     }
 
     function renderGameState() {
+        if (!gameData) return null;
+
         switch (gameState) {
             case "LOBBY":
                 return <Lobby room={gameData} isHost={isHost} onLeave={leaveGame} onStart={startGame} onKick={kickPlayer} />;
@@ -49,21 +50,44 @@ export default function GameRoom() {
         }
     }
 
-    function leaveGame() {
-        localStorage.removeItem("roomCode");
-        localStorage.removeItem("playerId");
-        localStorage.removeItem("host");
-        
+    function cleanupAndRedirect() {
+        sessionStorage.removeItem("roomCode");
+        sessionStorage.removeItem("playerId");
+        sessionStorage.removeItem("host");
+
         window.location.href = "/";
-        // Tell backend websocket that the player has left (not implemented)
+    }
+
+    function leaveGame() {
+        if (!stompClient) return;
+        
+        stompClient.publish({
+            destination: "/app/room.Leave",
+            body: JSON.stringify({
+                playerId: playerId,
+                roomCode: roomCode
+            })
+        })
+
+        cleanupAndRedirect();
     }
 
     function startGame() {
         console.log("Starting game...");
+        // TODO: Implement start game logic
     }
 
-    function kickPlayer(playerId) {
-        console.log("Kicking player:", playerId);
+    function kickPlayer(playerToKickId) {
+        if (!stompClient) return;
+
+        stompClient.publish({
+            destination: "/app/room.Kick",
+            body: JSON.stringify({
+                roomCode: roomCode,
+                hostId: playerId,
+                playerId: playerToKickId
+            })
+        });
     }
 
     useEffect(() => {
@@ -77,8 +101,18 @@ export default function GameRoom() {
         client.onConnect = () => {
             client.subscribe(`/topic/room/${roomCode}`, (message) => {
                 const data = JSON.parse(message.body);
-                console.log("STOMP message received:", data);
+                
+                if (data.type === "HOST_LEFT") {
+                    cleanupAndRedirect();
+                    return;
+                }
+
                 setGameData(data);
+
+                // If player was kicked
+                if (!data.players?.[playerId]) {
+                    cleanupAndRedirect();
+                }
             });
 
             setStompClient(client);
@@ -87,9 +121,7 @@ export default function GameRoom() {
         client.activate();
 
         return () => {
-            if (stompClient) {
-                stompClient.deactivate();
-            }
+            client.deactivate();
         }
     }, []);
 
@@ -98,7 +130,7 @@ export default function GameRoom() {
             {error && <ErrorToast message={error} onClose={() => setError("")} duration={4000} />}
             
             {!gameState || !gameData ? (
-                <Loading message="Fetching game data..." />
+                <Loading message="Loading Lobby..." />
             ) : (
                 renderGameState()
             )}

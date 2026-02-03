@@ -19,6 +19,7 @@ public class Room {
     private boolean enableHints;
     private String word;
     private List<String> categories;
+    private Player host;
     private Map<String, Player> players = new HashMap<>();  // Key = playerId, value = Player object
     private Set<String> imposterIds = new HashSet<>();      // Player IDs of imposters
 }

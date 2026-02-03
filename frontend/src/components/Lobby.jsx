@@ -1,6 +1,10 @@
 import "../css/Lobby.css";
 
 export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
+
+    const hostPlayer = room.players[room.host.id];
+    const otherPlayers = Object.entries(room.players).filter(([id]) => id !== room.host.id);
+
     return (
         <div className="lobby-wrapper">
             <div className="lobby-card">
@@ -8,7 +12,6 @@ export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
                 <main className="lobby-main">
                     <span className="room-code-label">SHARE THIS CODE</span>
                     <h1 className="room-code">{room.code}</h1>
-                    <h1>{console.log(isHost)}</h1>
                     <div className="settings-grid">
                         <div className="setting-item">
                             <span>Max Players</span>
@@ -27,13 +30,21 @@ export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
                     <div className="player-list">
                         <h3>Players in Lobby ({Object.keys(room.players).length}/4)</h3>
                         
-                        {Object.entries(room.players).map(([playerId, player]) => (
+                        <div className="player-row host-row">
+                            <div className="player-meta">
+                                <div className="avatar" style={{ background: hostPlayer.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }}/>
+                                <span className="player-name">{hostPlayer.name} (Host)</span>
+                            </div>
+                        </div>
+
+                        {otherPlayers.map(([playerId, player]) => (
                             <div key={playerId} className="player-row">
                                 <div className="player-meta">
-                                    <div className="avatar" style={{ background: player.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }} />
+                                    <div className="avatar" style={{ background: player.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }}/>
                                     <span className="player-name">{player.name}</span>
                                 </div>
-                                {isHost === "true" && <button className="remove-btn" title="Kick Player" onClick={() => onKick(playerId)}>✕</button>}
+
+                                {isHost && playerId !== room.host.id && <button className="remove-btn" title="Kick Player" onClick={() => onKick(playerId)}>✕</button>}
                             </div>
                         ))}
                     </div>
