@@ -38,6 +38,7 @@ export default function JoinRoom() {
             })
 
             const data = await response.json();
+            console.log(data);
 
             if (response.ok) {
                 // FOR PRDOUCTION, UNCOMMENT THESE LINES
@@ -51,12 +52,13 @@ export default function JoinRoom() {
                 sessionStorage.setItem("host", data.host);
 
                 navigate(`/room/${data.roomCode}`);
-
+                
             } else {
                 setError(data.message || "Failed to join room")
             }
 
         } catch (error) {
+            console.log(error);
             setError(error.message || "Network error")
         }
     }

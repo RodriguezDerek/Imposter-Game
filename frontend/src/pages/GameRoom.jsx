@@ -59,6 +59,8 @@ export default function GameRoom() {
     }
 
     function leaveGame() {
+        // TODO - Implement tab closed then leave room
+
         if (!stompClient) return;
         
         stompClient.publish({

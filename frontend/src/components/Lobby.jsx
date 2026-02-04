@@ -15,11 +15,11 @@ export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
                     <div className="settings-grid">
                         <div className="setting-item">
                             <span>Max Players</span>
-                            <strong>{room.settings?.maxPlayers || 4} Players</strong>
+                            <strong>{room.maxPlayers} Players</strong>
                         </div>
                         <div className="setting-item">
                             <span>Imposters</span>
-                            <strong>{room.settings?.imposters || 2} Count</strong>
+                            <strong>{room.gameMode === "ONE_IMPOSTER" ? 1 : 2} Count</strong>
                         </div>
                         <div className="setting-item">
                             <span>Hints</span>
@@ -28,25 +28,28 @@ export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
                     </div>
 
                     <div className="player-list">
-                        <h3>Players in Lobby ({Object.keys(room.players).length}/4)</h3>
-                        
-                        <div className="player-row host-row">
-                            <div className="player-meta">
-                                <div className="avatar" style={{ background: hostPlayer.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }}/>
-                                <span className="player-name">{hostPlayer.name} (Host)</span>
-                            </div>
-                        </div>
+                        <h3>Players in Lobby ({Object.keys(room.players).length}/{room.maxPlayers})</h3>
 
-                        {otherPlayers.map(([playerId, player]) => (
-                            <div key={playerId} className="player-row">
+                        <div className="player-rows-container">
+                            <div className="player-row host-row">
                                 <div className="player-meta">
-                                    <div className="avatar" style={{ background: player.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }}/>
-                                    <span className="player-name">{player.name}</span>
+                                    <div className="avatar" style={{ background: hostPlayer.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }}/>
+                                    <span className="player-name">{hostPlayer.name} (Host)</span>
                                 </div>
-
-                                {isHost && playerId !== room.host.id && <button className="remove-btn" title="Kick Player" onClick={() => onKick(playerId)}>✕</button>}
                             </div>
-                        ))}
+
+                            {otherPlayers.map(([playerId, player]) => (
+                                <div key={playerId} className="player-row">
+                                    <div className="player-meta">
+                                        <div className="avatar" style={{ background: player.color || 'linear-gradient(135deg, #6366f1, #a855f7)' }}/>
+                                        <span className="player-name">{player.name}</span>
+                                    </div>
+                                    {isHost && playerId !== room.host.id && (
+                                        <button className="remove-btn" title="Kick Player" onClick={() => onKick(playerId)}>✕</button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="footer-actions">

@@ -104,8 +104,6 @@ public class GameService {
                 room
         );
 
-        System.out.println(room.getPlayers());
-
         return PlayerRoomMessage.builder()
                 .roomCode(room.getCode())
                 .playerId(player.getId())
