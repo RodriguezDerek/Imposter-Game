@@ -5,6 +5,7 @@ import { use, useEffect, useState } from 'react';
 import ErrorToast from '../components/ErrorToast';
 import Loading from '../components/Loading';
 import Lobby from '../components/Lobby';
+import Discussion from '../components/Discussion';
 
 export default function GameRoom() {
     // TEMPORARY FOR TESTING
@@ -45,6 +46,9 @@ export default function GameRoom() {
             case "LOBBY":
                 return <Lobby room={gameData} isHost={isHost} onLeave={leaveGame} onStart={startGame} onKick={kickPlayer} />;
 
+            case "DISCUSSION":
+                return <Discussion />;
+
             default:
                 return <p>Unknown game state</p>;
         }
@@ -58,8 +62,13 @@ export default function GameRoom() {
         window.location.href = "/";
     }
 
+    function tabClosedEvent() {
+        // TODO - Implement tab closed accident
+        // If role given during ROLE_REVEAL phase, DISCUSSION Phase, or VOTING Phase (IMPOSTER, INNOCENT) then 
+        // the player left by accident game should end for all and show the the results page
+    }
+
     function leaveGame() {
-        // TODO - Implement tab closed then leave room
 
         if (!stompClient) return;
         

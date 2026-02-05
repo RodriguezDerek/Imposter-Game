@@ -17,7 +17,8 @@ public class Room {
     private GameState gameState;
     private int maxPlayers;
     private boolean enableHints;
-    private String word;
+    private String randomCategory;
+    private String randomWord;
     private List<String> categories;
     private Player host;
     private Map<String, Player> players = new HashMap<>();  // Key = playerId, value = Player object

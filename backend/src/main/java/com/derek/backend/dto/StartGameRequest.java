@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StartGameRequest {
-    private String hostId;
     private String roomCode;
 }

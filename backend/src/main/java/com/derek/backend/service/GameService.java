@@ -6,15 +6,14 @@ import com.derek.backend.message.GameStateMessage;
 import com.derek.backend.message.PlayerRoomMessage;
 import com.derek.backend.model.Player;
 import com.derek.backend.model.Room;
+import com.derek.backend.status.GameMode;
 import com.derek.backend.status.GameState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
-import javax.naming.NoPermissionException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.*;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +37,10 @@ public class GameService {
 
         if (request.getGameMode() == null) {
             throw new InvalidCreateRoomException("Game mode is required");
+        }
+
+        if (request.getGameMode() == GameMode.TWO_IMPOSTER && request.getMaxPlayers() < 5) {
+            throw new InvalidCreateRoomException("Two Imposters must have 6 or more players");
         }
 
         if (request.getCategories() == null || request.getCategories().isEmpty()) {
@@ -125,8 +128,31 @@ public class GameService {
                 .build();
     }
 
-    public void startGame(StartGameRequest request) {
+    public void startGame(StartGameRequest request) throws IOException {
+        String roomCode = request.getRoomCode();
 
+        Room room = rooms.get(roomCode);
+
+        if (room == null) {
+            throw new RoomNotFoundException("Room not found");
+        }
+
+        Random random = new Random();
+
+        setupGame(room, random);
+
+        room.setGameState(GameState.DISCUSSION);
+
+        GameStateMessage gameStateMessage = GameStateMessage.builder()
+                .type("ROLE_REVEAL")
+                .gameState(room.getGameState())
+                .room(room)
+                .build();
+
+        messageTemplate.convertAndSend(
+                "/topic/room" + roomCode,
+                gameStateMessage
+        );
     }
 
     public void leaveRoom(LeaveGameRequest request) {
@@ -147,12 +173,18 @@ public class GameService {
             // Host left → delete room
             rooms.remove(roomCode);
             Map<String, String> payload = Map.of("type", "HOST_LEFT");
-            messageTemplate.convertAndSend("/topic/room/" + roomCode, payload);
+            messageTemplate.convertAndSend(
+                    "/topic/room/" + roomCode,
+                    payload
+            );
 
         } else {
             // Remove player
             room.getPlayers().remove(playerId);
-            messageTemplate.convertAndSend("/topic/room/" + roomCode, room);
+            messageTemplate.convertAndSend(
+                    "/topic/room/" + roomCode,
+                    room
+            );
         }
     }
 
@@ -184,6 +216,56 @@ public class GameService {
     }
 
     public void setRoleReady() {
+    }
+
+    private void setupGame(Room room, Random random) throws IOException {
+        GameMode gameMode = room.getGameMode();
+        List<String> selectedCategories = room.getCategories();
+        Map<String, Player> players = room.getPlayers();
+        Set<String> imposterIds = room.getImposterIds();
+        List<String> playerIds = new ArrayList<>(players.keySet());
+
+        switch (gameMode) {
+            case ONE_IMPOSTER -> {
+                String imposter = playerIds.get(random.nextInt(playerIds.size()));
+                imposterIds.add(imposter);
+            }
+
+            case TWO_IMPOSTER -> {
+                String firstImposter = playerIds.get(random.nextInt(playerIds.size()));
+
+                String secondImposter;
+                do {
+                    secondImposter = playerIds.get(random.nextInt(playerIds.size()));
+                } while (secondImposter.equals(firstImposter));
+
+                imposterIds.add(firstImposter);
+                imposterIds.add(secondImposter);
+            }
+
+            default -> throw new InvalidGameModeException("Unsupported game mode");
+        }
+
+        String randomCategory = selectedCategories.get(random.nextInt(selectedCategories.size()));
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("words/" + randomCategory + ".txt");
+
+        if (inputStream == null) {
+            throw new FileNotFoundException("Category file not found: " + randomCategory + ".txt");
+        }
+
+        List<String> words;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            words = reader.lines().toList();
+        }
+
+        if (words.isEmpty()) {
+            throw new IllegalStateException("No words found in " + randomCategory + ".txt");
+        }
+
+        String randomWord = words.get(random.nextInt(words.size()));
+
+        room.setRandomCategory(randomCategory);
+        room.setRandomWord(randomWord);
     }
 
     private String validatePlayerName(String name) {

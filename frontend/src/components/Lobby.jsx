@@ -54,7 +54,7 @@ export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
 
                     <div className="footer-actions">
                         <button className="btn btn-leave" onClick={onLeave}>Leave Game</button>
-                        {isHost === "true" && <button className="btn btn-start" onClick={onStart}>Start Game</button>}
+                        {isHost && <button className="btn btn-start" onClick={onStart}>Start Game</button>}
                     </div>
                 </main>
 
