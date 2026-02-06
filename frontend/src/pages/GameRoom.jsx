@@ -1,56 +1,36 @@
 import '../css/GameRoom.css';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ErrorToast from '../components/ErrorToast';
 import Loading from '../components/Loading';
 import Lobby from '../components/Lobby';
 import Discussion from '../components/Discussion';
 
 export default function GameRoom() {
-    // TEMPORARY FOR TESTING
     const roomCode = sessionStorage.getItem("roomCode");
     const playerId = sessionStorage.getItem("playerId");
     const isHost = sessionStorage.getItem("host") === "true";
 
-    // FOR PRDOUCTION, UNCOMMENT THESE LINES
-    // const roomCode = localStorage.getItem("roomCode");
-    // const playerId = localStorage.getItem("playerId");
-    // const isHost = localStorage.getItem("host") === "true";
-
     const [stompClient, setStompClient] = useState(null);
-    const [gameState, setGameState] = useState(null);
     const [gameData, setGameData] = useState(null);
+    const [gameState, setGameState] = useState(null);
+    const [localPlayerData, setLocalPlayerData] = useState(null);
     const [error, setError] = useState("")
 
     async function fetchGameData() {
         try {
-            const response = await fetch(`http://localhost:8080/api/v1/games/room/${roomCode}`);
-            const data = await response.json();
+            const res = await fetch(`http://localhost:8080/api/v1/games/room/${roomCode}`);
+            const data = await res.json();
 
-            if (response.ok) {
-                setGameState(data.gameState);
+            if (res.ok) {
                 setGameData(data.room);
+                setGameState(data.gameState);
             } else {
                 setError(data.message || "Failed to get room data");
             }
         } catch (err) {
             setError(err.message || "Network error");
-        }
-    }
-
-    function renderGameState() {
-        if (!gameData) return null;
-
-        switch (gameState) {
-            case "LOBBY":
-                return <Lobby room={gameData} isHost={isHost} onLeave={leaveGame} onStart={startGame} onKick={kickPlayer} />;
-
-            case "DISCUSSION":
-                return <Discussion />;
-
-            default:
-                return <p>Unknown game state</p>;
         }
     }
 
@@ -69,7 +49,6 @@ export default function GameRoom() {
     }
 
     function leaveGame() {
-
         if (!stompClient) return;
         
         stompClient.publish({
@@ -84,8 +63,15 @@ export default function GameRoom() {
     }
 
     function startGame() {
-        console.log("Starting game...");
-        // TODO: Implement start game logic
+        if (!stompClient) return;
+
+        stompClient.publish({
+            destination: "/app/room.Start",
+            body: JSON.stringify({
+                roomCode: roomCode,
+                hostId: playerId
+            })
+        });
     }
 
     function kickPlayer(playerToKickId) {
@@ -101,6 +87,21 @@ export default function GameRoom() {
         });
     }
 
+    function renderGameState() {
+        if (!gameData || !gameState) return null;
+
+        switch (gameState) {
+            case "LOBBY":
+                return <Lobby room={gameData} isHost={isHost} onLeave={leaveGame} onStart={startGame} onKick={kickPlayer} />;
+
+            case "DISCUSSION":
+                return <Discussion room={gameData} localPlayer={localPlayerData} />;
+
+            default:
+                return <p>Unknown game state</p>;
+        }
+    }
+
     useEffect(() => {
         fetchGameData();
 
@@ -110,6 +111,7 @@ export default function GameRoom() {
         });
 
         client.onConnect = () => {
+            // Public room updates
             client.subscribe(`/topic/room/${roomCode}`, (message) => {
                 const data = JSON.parse(message.body);
                 
@@ -118,12 +120,31 @@ export default function GameRoom() {
                     return;
                 }
 
-                setGameData(data);
-
-                // If player was kicked
-                if (!data.players?.[playerId]) {
+                if (data.kickedPlayerId === playerId) {
                     cleanupAndRedirect();
+                    return;
                 }
+
+                if (data.room) {
+                    setGameData(data.room);
+                    setGameState(data.gameState);
+                }
+            });
+
+            // Private per-player game info
+            client.subscribe(`/topic/room/${roomCode}/private`, (message) => {
+                const data = JSON.parse(message.body);
+                console.log(data);
+                // only set localPlayerData if it’s you
+                if (data.playerId === playerId) { 
+                    setLocalPlayerData(data);
+                }
+            });
+
+            // Error handling
+            client.subscribe(`/topic/room/${roomCode}/errors`, (message) => {
+                const error = JSON.parse(message.body);
+                setError(error.message);
             });
 
             setStompClient(client);

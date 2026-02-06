@@ -86,4 +86,49 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .build();
-    }}
+    }
+
+    @ExceptionHandler(EmptyWordFileException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleEmptyWordFileException(EmptyWordFileException e) {
+        return ErrorMessage.builder()
+                .message(e.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(WordFileNotFoundException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleWordFileNotFoundException(WordFileNotFoundException e) {
+        return ErrorMessage.builder()
+                .message(e.getMessage())
+                .status(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(CategoriesEmptyException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage handleCategoriesEmptyException(CategoriesEmptyException e) {
+        return ErrorMessage.builder()
+                .message(e.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler(InvalidPlayerAmountException.class)
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage handleInvalidPlayerAmountException(InvalidPlayerAmountException e) {
+        return ErrorMessage.builder()
+                .message(e.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+}

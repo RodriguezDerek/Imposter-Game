@@ -1,7 +1,6 @@
 import "../css/Lobby.css";
 
 export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
-
     const hostPlayer = room.players[room.host.id];
     const otherPlayers = Object.entries(room.players).filter(([id]) => id !== room.host.id);
 
@@ -62,9 +61,7 @@ export default function Lobby({ room, isHost, onLeave, onStart, onKick }) {
                     <h2 className="sidebar-title">Game Categories</h2>
                     <div className="category-grid">
                         {room.categories.map((cat, idx) => (
-                            <div key={idx} className={`category-item ${cat ? 'active' : 'empty'}`}>
-                                {cat || 'Empty Slot'}
-                            </div>
+                            <div key={idx} className={`category-item ${cat ? 'active' : 'empty'}`}>{cat || 'Empty Slot'}</div>
                         ))}
                     </div>
                 </aside>

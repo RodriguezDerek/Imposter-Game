@@ -1,0 +1,10 @@
+pizza
+burger
+sushi
+tacos
+pasta
+ramen
+fried rice
+ice cream
+chocolate cake
+apple pie

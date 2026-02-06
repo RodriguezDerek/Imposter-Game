@@ -15,4 +15,5 @@ public class GameStateMessage {
     private String type;
     private GameState gameState;
     private Room room;
+    private String kickedPlayerId;
 }

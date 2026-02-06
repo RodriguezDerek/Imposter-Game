@@ -3,16 +3,19 @@ package com.derek.backend.service;
 import com.derek.backend.dto.*;
 import com.derek.backend.exception.*;
 import com.derek.backend.message.GameStateMessage;
+import com.derek.backend.message.PlayerGameView;
 import com.derek.backend.message.PlayerRoomMessage;
 import com.derek.backend.model.Player;
 import com.derek.backend.model.Room;
 import com.derek.backend.status.GameMode;
 import com.derek.backend.status.GameState;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -78,7 +81,8 @@ public class GameService {
     }
 
     public PlayerRoomMessage joinRoom(JoinRoomRequest request) {
-        Room room = rooms.get(request.getRoomCode());
+        String roomCode = request.getRoomCode();
+        Room room = rooms.get(roomCode);
 
         if (room == null) {
             throw new RoomNotFoundException("Room not found");
@@ -103,12 +107,16 @@ public class GameService {
         room.getPlayers().put(player.getId(), player);
 
         messageTemplate.convertAndSend(
-                "/topic/room/" + request.getRoomCode(),
-                room
+                "/topic/room/" + roomCode,
+                GameStateMessage.builder()
+                        .type("LOBBY")
+                        .gameState(room.getGameState())
+                        .room(room)
+                        .build()
         );
 
         return PlayerRoomMessage.builder()
-                .roomCode(room.getCode())
+                .roomCode(roomCode)
                 .playerId(player.getId())
                 .isHost(player.isHost())
                 .build();
@@ -128,30 +136,51 @@ public class GameService {
                 .build();
     }
 
-    public void startGame(StartGameRequest request) throws IOException {
+    public void startGame(StartGameRequest request) {
         String roomCode = request.getRoomCode();
-
         Room room = rooms.get(roomCode);
 
         if (room == null) {
             throw new RoomNotFoundException("Room not found");
         }
 
-        Random random = new Random();
+        if (!room.getHost().getId().equals(request.getHostId())) {
+            sendError(room.getCode(), "Only host can start the game");
+            return;
+        }
 
-        setupGame(room, random);
+        if (room.getPlayers().size() < 3) {
+            sendError(room.getCode(), "Not enough players to start the game");
+            return;
+        }
 
-        room.setGameState(GameState.DISCUSSION);
+        if (room.getPlayers().size() < 5 && room.getGameMode() == GameMode.TWO_IMPOSTER) {
+            sendError(room.getCode(), "Not enough players for two imposters");
+            return;
+        }
 
-        GameStateMessage gameStateMessage = GameStateMessage.builder()
-                .type("ROLE_REVEAL")
-                .gameState(room.getGameState())
-                .room(room)
-                .build();
+        room.getImposterIds().clear();
+        setupGame(room, new Random());
+
+        for (Player player : room.getPlayers().values()) {
+            boolean isImposter = room.getImposterIds().contains(player.getId());
+            messageTemplate.convertAndSend(
+                    "/topic/room/" + roomCode + "/private",
+                    (Object) Map.of(
+                            "playerId", player.getId(),
+                            "isImposter", isImposter,
+                            "word", isImposter ? room.getRandomCategory() : room.getRandomWord()
+                    )
+            );
+        }
 
         messageTemplate.convertAndSend(
-                "/topic/room" + roomCode,
-                gameStateMessage
+                "/topic/room/" + roomCode,
+                GameStateMessage.builder()
+                        .type("DISCUSSION")
+                        .gameState(room.getGameState())
+                        .room(room)
+                        .build()
         );
     }
 
@@ -172,18 +201,21 @@ public class GameService {
         if (room.getHost().getId().equals(playerId)) {
             // Host left → delete room
             rooms.remove(roomCode);
-            Map<String, String> payload = Map.of("type", "HOST_LEFT");
             messageTemplate.convertAndSend(
-                    "/topic/room/" + roomCode,
-                    payload
+                    "/topic/room/" + room.getCode(),
+                    (Object) Map.of("type", "HOST_LEFT")
             );
 
         } else {
             // Remove player
             room.getPlayers().remove(playerId);
             messageTemplate.convertAndSend(
-                    "/topic/room/" + roomCode,
-                    room
+                    "/topic/room/" + room.getCode(),
+                    GameStateMessage.builder()
+                            .type("LOBBY")
+                            .gameState(room.getGameState())
+                            .room(room)
+                            .build()
             );
         }
     }
@@ -210,19 +242,26 @@ public class GameService {
         room.getPlayers().remove(playerId);
 
         messageTemplate.convertAndSend(
-                "/topic/room/" + roomCode,
-                room
+                "/topic/room/" + room.getCode(),
+                GameStateMessage.builder()
+                        .type("LOBBY")
+                        .gameState(room.getGameState())
+                        .room(room)
+                        .kickedPlayerId(playerId)
+                        .build()
         );
     }
 
-    public void setRoleReady() {
-    }
-
-    private void setupGame(Room room, Random random) throws IOException {
+    private void setupGame(Room room, Random random) {
         GameMode gameMode = room.getGameMode();
         List<String> selectedCategories = room.getCategories();
         Map<String, Player> players = room.getPlayers();
         Set<String> imposterIds = room.getImposterIds();
+
+        if (selectedCategories == null || selectedCategories.isEmpty()) {
+            throw new CategoriesEmptyException("No categories selected");
+        }
+
         List<String> playerIds = new ArrayList<>(players.keySet());
 
         switch (gameMode) {
@@ -232,8 +271,11 @@ public class GameService {
             }
 
             case TWO_IMPOSTER -> {
-                String firstImposter = playerIds.get(random.nextInt(playerIds.size()));
+                if (playerIds.size() < 5) {
+                    throw new InvalidPlayerAmountException("Not enough players for two imposters");
+                }
 
+                String firstImposter = playerIds.get(random.nextInt(playerIds.size()));
                 String secondImposter;
                 do {
                     secondImposter = playerIds.get(random.nextInt(playerIds.size()));
@@ -246,26 +288,41 @@ public class GameService {
             default -> throw new InvalidGameModeException("Unsupported game mode");
         }
 
-        String randomCategory = selectedCategories.get(random.nextInt(selectedCategories.size()));
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("words/" + randomCategory + ".txt");
+        String randomCategory = selectedCategories.get(
+                random.nextInt(selectedCategories.size())
+        );
+
+        InputStream inputStream = getClass()
+                .getClassLoader()
+                .getResourceAsStream("words/" + randomCategory + ".txt");
 
         if (inputStream == null) {
-            throw new FileNotFoundException("Category file not found: " + randomCategory + ".txt");
+            throw new WordFileNotFoundException("Category file not found: " + randomCategory + ".txt");
         }
 
         List<String> words;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             words = reader.lines().toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
         }
 
         if (words.isEmpty()) {
-            throw new IllegalStateException("No words found in " + randomCategory + ".txt");
+            throw new EmptyWordFileException("No words found in " + randomCategory + ".txt");
         }
 
         String randomWord = words.get(random.nextInt(words.size()));
 
         room.setRandomCategory(randomCategory);
         room.setRandomWord(randomWord);
+        room.setGameState(GameState.DISCUSSION);
+    }
+
+    private void sendError(String roomCode, String message) {
+        messageTemplate.convertAndSend(
+                "/topic/room/" + roomCode + "/errors",
+                new ErrorMessage(message, HttpStatus.BAD_REQUEST.value(), LocalDateTime.now())
+        );
     }
 
     private String validatePlayerName(String name) {
