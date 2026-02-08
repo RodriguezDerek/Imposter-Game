@@ -38,15 +38,8 @@ export default function JoinRoom() {
             })
 
             const data = await response.json();
-            console.log(data);
 
             if (response.ok) {
-                // FOR PRDOUCTION, UNCOMMENT THESE LINES
-                // localStorage.setItem("roomCode", data.roomCode);
-                // localStorage.setItem("playerId", data.playerId);
-                // localStorage.setItem("host", data.host);
-
-                // TEMPORARY FOR TESTING
                 sessionStorage.setItem("roomCode", data.roomCode);
                 sessionStorage.setItem("playerId", data.playerId);
                 sessionStorage.setItem("host", data.host);
@@ -58,7 +51,6 @@ export default function JoinRoom() {
             }
 
         } catch (error) {
-            console.log(error);
             setError(error.message || "Network error")
         }
     }

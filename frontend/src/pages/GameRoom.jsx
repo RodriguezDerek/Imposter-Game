@@ -95,7 +95,11 @@ export default function GameRoom() {
                 return <Lobby room={gameData} isHost={isHost} onLeave={leaveGame} onStart={startGame} onKick={kickPlayer} />;
 
             case "DISCUSSION":
-                return <Discussion room={gameData} localPlayer={localPlayerData} />;
+                if (!localPlayerData) {
+                    return <Loading message="Receiving role..." />;
+                }
+
+                return <Discussion room={gameData} localPlayerInfo={localPlayerData} />;
 
             default:
                 return <p>Unknown game state</p>;
@@ -134,7 +138,6 @@ export default function GameRoom() {
             // Private per-player game info
             client.subscribe(`/topic/room/${roomCode}/private`, (message) => {
                 const data = JSON.parse(message.body);
-                console.log(data);
                 // only set localPlayerData if it’s you
                 if (data.playerId === playerId) { 
                     setLocalPlayerData(data);
@@ -152,9 +155,7 @@ export default function GameRoom() {
 
         client.activate();
 
-        return () => {
-            client.deactivate();
-        }
+        return () => client.deactivate();
     }, []);
 
     return(

@@ -11,5 +11,6 @@ public class Player {
     private String id;
     private String name;
     private boolean isHost;
-    private boolean isReady = false;
+    private boolean wordSpoken = false;
+    private boolean voteSent = false;
 }

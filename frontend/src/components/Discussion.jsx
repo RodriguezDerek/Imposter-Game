@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import RoleReveal from "./RoleReveal.jsx"
 import "../css/Discussion.css";
-import RoleReveal from "./RoleReveal";
 
-export default function Discussion({ room, localPlayer }) {
-    const [showRoleReveal, setShowRoleReveal] = useState(true); 
+export default function Discussion({ room, localPlayerInfo }) {
+    const playersArray = Object.values(room.players || {});
+    const [showRoleReveal, setShowRoleReveal] = useState(true);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowRoleReveal(false), 5000);
@@ -11,13 +12,13 @@ export default function Discussion({ room, localPlayer }) {
     }, []);
 
     if (showRoleReveal) {
-        return <RoleReveal roleInfo={localPlayer} />;
+        return (
+            <RoleReveal roleInfo={localPlayerInfo}/>
+        );
     }
 
     return (
-        <div>
-            <h1>{console.log(room)}</h1>
-            <h2>{console.log(localPlayer)}</h2>
+        <div className="lobby-wrapper">
         </div>
-    );
+   );
 }

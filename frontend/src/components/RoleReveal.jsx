@@ -1,9 +1,7 @@
 import "../css/RoleReveal.css";
 
 export default function RoleReveal({ roleInfo }) {
-    if (!roleInfo) {
-        return <h1>No role information available</h1>;
-    }
+    if (!roleInfo) return null;
 
     return (
         <div className={`role-outer ${roleInfo.isImposter ? "theme-imposter" : "theme-innocent"}`}>

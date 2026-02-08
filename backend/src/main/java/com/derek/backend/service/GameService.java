@@ -67,7 +67,8 @@ public class GameService {
         host.setId(UUID.randomUUID().toString());
         host.setName(request.getHostName().trim());
         host.setHost(true);
-        host.setReady(false);
+        host.setWordSpoken(false);
+        host.setVoteSent(false);
         room.setHost(host);
         room.getPlayers().put(host.getId(), host);
 
@@ -102,7 +103,8 @@ public class GameService {
         player.setId(UUID.randomUUID().toString());
         player.setName(playerName);
         player.setHost(false);
-        player.setReady(false);
+        player.setWordSpoken(false);
+        player.setVoteSent(false);
 
         room.getPlayers().put(player.getId(), player);
 
